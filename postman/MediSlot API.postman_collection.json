@@ -1,0 +1,43 @@
+{
+  "info": {
+    "_postman_id": "83341f86-cc74-421d-9528-4e5aedf1f2ae",
+    "name": "MediSlot API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52901012",
+    "_collection_link": "https://go.postman.co/collection/52901012-83341f86-cc74-421d-9528-4e5aedf1f2ae?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Doctors list",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Doctors detail",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Create booking",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Cancel booking",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    }
+  ]
+}
