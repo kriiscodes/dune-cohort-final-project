@@ -21,7 +21,7 @@ from accounts import views as accounts_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path("accounts/signup/", accounts_views.signup, name="signup"),
-    path('accounts/', include('django.contrib.auth.urls')), 
+    path('accounts/', include('django.contrib.auth.urls')),
+    path("dashboard/", accounts_views.dashboard_view, name="dashboard"),
     path("", include("appointments.urls")),
-    
 ]

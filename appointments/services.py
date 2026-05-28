@@ -3,7 +3,6 @@ from django.utils import timezone
 from django.db import IntegrityError
 from appointments.models import AvailabilityRule, Appointment
 
-
 def get_available_slots(doctor, date):
     rules = AvailabilityRule.objects.filter(doctor=doctor,weekday=date.weekday())
     taken = Appointment.objects.filter(doctor=doctor,status="booked",scheduled_for__date=date,)
@@ -31,3 +30,5 @@ def create_booking(doctor, patient, scheduled_for):
     except IntegrityError:
         return {"ok": False, "reason": "slot_taken", "appointment": None}
     return {"ok": True, "reason": None, "appointment": appointment}
+
+
