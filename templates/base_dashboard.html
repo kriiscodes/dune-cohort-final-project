@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body %}
+<div class="dash">
+  <aside class="dash-sidebar">
+    <a href="{% url 'home' %}" class="dash-logo">
+      <span class="nav-logo-mark">+</span>
+    </a>
+
+    <nav class="dash-nav">
+      <a href="{% url 'dashboard' %}" class="dash-nav-link" title="Dashboard">
+        <span class="dash-nav-icon">🏠</span>
+      </a>
+      <a href="{% url 'dashboard' %}" class="dash-nav-link" title="Appointments">
+        <span class="dash-nav-icon">📅</span>
+      </a>
+      {% if request.user.role == 'doctor' %}
+        <a href="{% url 'dashboard' %}" class="dash-nav-link" title="Schedule">
+          <span class="dash-nav-icon">🗓️</span>
+        </a>
+      {% endif %}
+      <a href="{% url 'dashboard' %}" class="dash-nav-link" title="Profile">
+        <span class="dash-nav-icon">👤</span>
+      </a>
+    </nav>
+
+    <form method="post" action="{% url 'logout' %}" class="dash-logout">
+      {% csrf_token %}
+      <button type="submit" class="dash-nav-link" title="Log out">
+        <span class="dash-nav-icon">↪</span>
+      </button>
+    </form>
+  </aside>
+
+  <main class="dash-main">
+    <header class="dash-header">
+      <div>
+        <h1 class="dash-greeting">{% block dash_greeting %}Welcome, {{ request.user.username }}{% endblock %}</h1>
+        <p class="dash-subgreeting">{% block dash_subgreeting %}Have a nice day at work.{% endblock %}</p>
+      </div>
+      <div class="dash-userchip">
+        <span class="dash-userchip-name">{{ request.user.username }}</span>
+        <span class="badge badge-{{ request.user.role }}">{{ request.user.role }}</span>
+      </div>
+    </header>
+
+    {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+          <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+
+    <div class="dash-content">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+{% endblock %}

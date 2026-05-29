@@ -1,0 +1,75 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Today's schedule{% endblock %}
+
+{% block dash_greeting %}Welcome, Dr. {{ request.user.username }}{% endblock %}
+{% block dash_subgreeting %}Have a nice day at work.{% endblock %}
+
+{% block content %}
+  {% if not request.user.doctor_profile.is_verified %}
+    <div class="dash-card" style="border-left: 4px solid var(--no-show);">
+      <h2>Account pending verification</h2>
+      <p>Your doctor profile is awaiting admin verification. You won't appear in patient search until you're approved.</p>
+    </div>
+  {% endif %}
+
+  <div class="dash-banner">
+    <div>
+      <h2>Today, {{ today|date:"l, j F" }}</h2>
+      <p>You have {{ today_count }} appointment{{ today_count|pluralize }} scheduled today.</p>
+    </div>
+  </div>
+
+  <div class="dash-stats">
+    <div class="dash-stat">
+      <p class="dash-stat-label">Today</p>
+      <p class="dash-stat-value">{{ today_count }}</p>
+    </div>
+    <div class="dash-stat">
+      <p class="dash-stat-label">This week</p>
+      <p class="dash-stat-value">{{ week_count }}</p>
+    </div>
+    <div class="dash-stat">
+      <p class="dash-stat-label">No-shows (30d)</p>
+      <p class="dash-stat-value">{{ no_show_count }}</p>
+    </div>
+  </div>
+
+  <div class="dash-card">
+    <h2>Upcoming patients</h2>
+    {% if upcoming %}
+      <ul class="appt-list">
+        {% for appt in upcoming %}
+          <li class="appt-item">
+            <div>
+              <strong>{{ appt.patient.username }}</strong>
+              <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+            </div>
+            <div class="appt-actions">
+              {% if appt.scheduled_for <= now %}
+                <form method="post" action="{% url 'mark_complete' appt.id %}" class="appt-action-form">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-secondary btn-sm">Mark complete</button>
+                </form>
+                <form method="post" action="{% url 'mark_no_show' appt.id %}" class="appt-action-form">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-ghost btn-sm">No-show</button>
+                </form>
+              {% else %}
+                <span class="badge badge-booked">Booked</span>
+              {% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No upcoming appointments. Patients will appear here once they book.</p>
+    {% endif %}
+  </div>
+
+    <div class="dash-card">
+        <h2>My availability</h2>
+        <p>Set the days and hours you're open to bookings.</p>
+        <a href="{% url 'availability_list' %}" class="btn btn-primary">Manage schedule</a>
+    </div>
+{% endblock %}

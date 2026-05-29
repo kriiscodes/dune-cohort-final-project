@@ -1,8 +1,52 @@
-{% extends "base.html" %}
+{% extends "base_marketing.html" %}
 
-{% block title %}Home — MediSlot{% endblock %}
+{% block title %}Book a doctor in minutes{% endblock %}
 
 {% block content %}
-  <h1>Welcome to MediSlot</h1>
-  <p>Find a doctor and book an appointment.</p>
+  <section class="hero">
+    <div class="container">
+      <p class="hero-eyebrow">HEALTHCARE, ON YOUR SCHEDULE</p>
+      <h1>Book a doctor in minutes,<br>not days.</h1>
+      <p>MediSlot makes it easy to find verified doctors, see their real-time availability, and book an appointment that actually fits your day.</p>
+      <div class="hero-ctas">
+        <a href="{% url 'doctor_list' %}" class="btn btn-primary btn-lg">Find a doctor</a>
+        <a href="{% url 'about' %}" class="btn btn-secondary btn-lg">How it works</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <h2>Why MediSlot</h2>
+        <p>Three things we get right that booking by phone doesn't.</p>
+      </div>
+
+      <div class="card-grid">
+        <div class="card">
+          <div class="feature-icon">📅</div>
+          <h3>Real-time availability</h3>
+          <p>See open slots the moment they're free. No back-and-forth, no "we'll call you back."</p>
+        </div>
+        <div class="card">
+          <div class="feature-icon">✓</div>
+          <h3>Verified doctors only</h3>
+          <p>Every doctor on MediSlot is reviewed and approved before they show up in search.</p>
+        </div>
+        <div class="card">
+          <div class="feature-icon">⚡</div>
+          <h3>Built to cut no-shows</h3>
+          <p>Easy reschedule and cancellation means slots free up fast — for you and the next patient.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-tint">
+    <div class="container cta-band">
+      <h2>Ready to book your first appointment?</h2>
+      <p>Browse our verified doctors and book in under two minutes.</p>
+      <a href="{% url 'doctor_list' %}" class="btn btn-primary btn-lg">See doctors</a>
+    </div>
+  </section>
 {% endblock %}

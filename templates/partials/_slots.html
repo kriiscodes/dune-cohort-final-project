@@ -1,0 +1,24 @@
+{% if slots %}
+  <p class="slots-date-label">Showing slots for {{ selected_date|date:"l, j F Y" }}</p>
+  <div class="slot-grid">
+    {% for slot in slots %}
+      {% if request.user.is_authenticated and request.user.role == 'patient' %}
+        <form method="post" action="{% url 'book_appointment' doctor.id %}" class="slot-form">
+          {% csrf_token %}
+          <input type="hidden" name="scheduled_for" value="{{ slot|date:'Y-m-d H:i' }}">
+          <button type="submit" class="slot-btn">{{ slot|date:"H:i" }}</button>
+        </form>
+      {% elif request.user.is_authenticated %}
+           <span class="slot-btn slot-btn-locked">{{ slot|date:"H:i" }}</span>  {# disabled #}
+      {% else %}
+        <a href="{% url 'login' %}?next={% url 'doctor_detail' doctor.id %}" class="slot-btn slot-btn-locked">
+          {{ slot|date:"H:i" }} 🔒
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="slots-empty">
+    <p>No available slots on {{ selected_date|date:"l, j F Y" }}. Try another date.</p>
+  </div>
+{% endif %}

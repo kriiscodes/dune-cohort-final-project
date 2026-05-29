@@ -1,0 +1,37 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}My availability{% endblock %}
+
+{% block dash_greeting %}My availability{% endblock %}
+{% block dash_subgreeting %}Set the days and hours you're open to bookings.{% endblock %}
+
+{% block content %}
+  <div class="dash-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0;">My schedule rules</h2>
+      <a href="{% url 'availability_create' %}" class="btn btn-primary">+ Add rule</a>
+    </div>
+
+    {% if rules %}
+      <ul class="appt-list">
+        {% for rule in rules %}
+          <li class="appt-item">
+            <div>
+              <strong>{{ rule.get_weekday_display }}</strong>
+              <p class="appt-time">
+                {{ rule.start_time|time:"H:i" }} – {{ rule.end_time|time:"H:i" }}
+                · {{ rule.slot_duration }} min slots
+              </p>
+            </div>
+            <div class="appt-actions">
+              <a href="{% url 'availability_edit' rule.id %}" class="btn btn-secondary btn-sm">Edit</a>
+              <a href="{% url 'availability_delete' rule.id %}" class="btn btn-ghost btn-sm">Delete</a>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>You haven't set any availability yet. <a href="{% url 'availability_create' %}">Add your first rule</a> to start receiving bookings.</p>
+    {% endif %}
+  </div>
+{% endblock %}

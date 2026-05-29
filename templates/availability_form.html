@@ -1,0 +1,52 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}
+  {% if mode == "create" %}Add availability{% else %}Edit availability{% endif %}
+{% endblock %}
+
+{% block dash_greeting %}
+  {% if mode == "create" %}Add an availability rule{% else %}Edit availability rule{% endif %}
+{% endblock %}
+{% block dash_subgreeting %}
+  Define the days and hours you're open to bookings.
+{% endblock %}
+
+{% block content %}
+  <div class="dash-card" style="max-width: 560px;">
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <ul class="errorlist">
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+
+      {% for field in form %}
+        <div class="form-field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <p class="helptext">{{ field.help_text }}</p>
+          {% endif %}
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div style="display:flex; gap:12px; margin-top:24px;">
+        <button type="submit" class="btn btn-primary">
+          {% if mode == "create" %}Add rule{% else %}Save changes{% endif %}
+        </button>
+        <a href="{% url 'availability_list' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

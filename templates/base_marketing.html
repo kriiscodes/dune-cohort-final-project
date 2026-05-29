@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block body %}
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="{% url 'home' %}" class="nav-logo">
+        <span class="nav-logo-mark">+</span>
+        MediSlot
+      </a>
+
+      <div class="nav-links">
+        <a href="{% url 'home' %}">Home</a>
+        <a href="{% url 'about' %}">About</a>
+        <a href="{% url 'doctor_list' %}">Doctors</a>
+      </div>
+
+      <div class="nav-cta">
+        {% if request.user.is_authenticated %}
+          <a href="{% url 'dashboard' %}" class="btn btn-primary">Dashboard</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn btn-ghost">Log in</a>
+          <a href="{% url 'signup' %}" class="btn btn-primary">Sign up</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <main class="marketing-main">
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+  <footer class="footer">
+    <div class="footer-inner">
+      <p>&copy; 2026 MediSlot. Built for the Dune Cohort.</p>
+    </div>
+  </footer>
+{% endblock %}

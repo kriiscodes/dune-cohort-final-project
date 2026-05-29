@@ -1,0 +1,34 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Delete availability rule{% endblock %}
+
+{% block dash_greeting %}Delete this rule?{% endblock %}
+{% block dash_subgreeting %}This action cannot be undone.{% endblock %}
+
+{% block content %}
+  <div class="dash-card" style="max-width: 560px;">
+    <p>You're about to delete this availability rule:</p>
+
+    <div class="appt-item" style="border-bottom: none;">
+      <div>
+        <strong>{{ rule.get_weekday_display }}</strong>
+        <p class="appt-time">
+          {{ rule.start_time|time:"H:i" }} – {{ rule.end_time|time:"H:i" }}
+          · {{ rule.slot_duration }} min slots
+        </p>
+      </div>
+    </div>
+
+    <p style="margin-top: 16px;">
+      Patients won't be able to book new slots under this rule. Existing bookings are unaffected.
+    </p>
+
+    <form method="post" style="display:flex; gap:12px; margin-top:24px;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary" style="background: var(--no-show);">
+        Yes, delete
+      </button>
+      <a href="{% url 'availability_list' %}" class="btn btn-ghost">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

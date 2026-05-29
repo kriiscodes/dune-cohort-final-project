@@ -1,30 +1,225 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import render
-from rest_framework import generics
+from django.shortcuts import render, get_object_or_404, redirect
+from rest_framework import generics, status
 from accounts.models import DoctorProfile
 from .serializers import DoctorSerializer
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Appointment, AvailabilityRule
+from .serializers import AppointmentSerializer
+from .services import create_booking, get_available_slots,mark_appointment_completed, mark_appointment_no_show
+from datetime import date, datetime
+from django.contrib import messages
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.http import HttpResponseNotAllowed, Http404
+from .forms import AvailabilityRuleForm
 
 
 def home(request):
     return render(request, "home.html")
 
+def about(request):
+    return render(request, "about.html")
 
-@login_required
-def my_appointments(request):
-    return HttpResponse("Your appointments will appear here.")
+
+def doctor_list(request):
+    doctors = DoctorProfile.objects.filter(is_verified=True).select_related("user")
+    return render(request, "doctor_list.html", {"doctors": doctors})
+
+
+def doctor_detail(request, doctor_id):
+    doctor = get_object_or_404(
+        DoctorProfile.objects.select_related("user"),
+        id=doctor_id,
+        is_verified=True,
+    )
+    today = date.today()
+    slots = get_available_slots(doctor.user, today)
+    return render(request, "doctor_detail.html", {
+        "doctor": doctor,
+        "today": today,
+        "slots": slots,
+    })
+
+def doctor_slots_partial(request, doctor_id):
+    """HTMX endpoint: returns just the slots fragment for a given date."""
+    doctor = get_object_or_404(
+        DoctorProfile.objects.select_related("user"),
+        id=doctor_id,
+        is_verified=True,
+    )
+    date_str = request.GET.get("date")
+    try:
+        target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except (TypeError, ValueError):
+        target_date = date.today()
+
+    slots = get_available_slots(doctor.user, target_date)
+    return render(request, "partials/_slots.html", {
+        "doctor": doctor,
+        "slots": slots,
+        "selected_date": target_date,
+    })
+
+
+
+# @login_required
+# def my_appointments(request):
+#     return HttpResponse("Your appointments will appear here.")
 
 
 @login_required
 def book_appointment(request, doctor_id):
-    return HttpResponse(f"Booking flow for doctor #{doctor_id}.")
+    if request.method != "POST":
+        return redirect("doctor_detail", doctor_id=doctor_id)
+
+    doctor = get_object_or_404(
+        DoctorProfile.objects.select_related("user"),
+        id=doctor_id,
+        is_verified=True,
+    )
+
+    scheduled_for_str = request.POST.get("scheduled_for", "")
+    try:
+        scheduled_for = datetime.strptime(scheduled_for_str, "%Y-%m-%d %H:%M")
+    except ValueError:
+        messages.error(request, "Invalid slot. Please pick another.")
+        return redirect("doctor_detail", doctor_id=doctor_id)
+
+    result = create_booking(
+        doctor=doctor.user,
+        patient=request.user,
+        scheduled_for=scheduled_for,
+    )
+
+    if result["ok"]:
+        messages.success(
+            request,
+            f"Booked with Dr. {doctor.user.username} on {scheduled_for.strftime('%a %d %b at %H:%M')}."
+        )
+        return redirect("dashboard")
+    else:
+        messages.error(request, "That slot was just taken. Please pick another.")
+        return redirect("doctor_detail", doctor_id=doctor_id)
+
+@login_required
+def mark_complete_view(request, appointment_id):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    try:
+        mark_appointment_completed(appointment, actor=request.user)
+        messages.success(request, "Appointment marked complete.")
+    except PermissionDenied:
+        # 404 instead of 403 — anti-enumeration, don't confirm the appointment exists.
+        from django.http import Http404
+        raise Http404
+    except ValidationError as e:
+        messages.error(request, str(e.message if hasattr(e, "message") else e))
+    
+    return redirect("dashboard")
 
 
-@staff_member_required
-def staff_dashboard(request):
-    return HttpResponse("Staff dashboard.")
+@login_required
+def mark_no_show_view(request, appointment_id):
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    
+    appointment = get_object_or_404(Appointment, id=appointment_id)
+    try:
+        mark_appointment_no_show(appointment, actor=request.user)
+        messages.success(request, "Appointment marked no-show.")
+    except PermissionDenied:
+        from django.http import Http404
+        raise Http404
+    except ValidationError as e:
+        messages.error(request, str(e.message if hasattr(e, "message") else e))
+    
+    return redirect("dashboard")
+
+
+def _require_doctor(request):
+    """Helper: 404 if the user isn't a doctor. Same anti-enumeration pattern."""
+    if request.user.role != "doctor":
+        raise Http404
+
+
+@login_required
+def availability_list(request):
+    _require_doctor(request)
+    rules = (
+        AvailabilityRule.objects
+        .filter(doctor=request.user)
+        .order_by("weekday", "start_time")
+    )
+    return render(request, "availability_list.html", {"rules": rules})
+
+
+@login_required
+def availability_create(request):
+    _require_doctor(request)
+
+    if request.method == "POST":
+        form = AvailabilityRuleForm(request.POST)
+        if form.is_valid():
+            rule = form.save(commit=False)
+            rule.doctor = request.user   # attach owner server-side — never trust client
+            rule.save()
+            messages.success(request, "Availability rule added.")
+            return redirect("availability_list")
+    else:
+        form = AvailabilityRuleForm()
+
+    return render(request, "availability_form.html", {
+        "form": form,
+        "mode": "create",
+    })
+
+
+@login_required
+def availability_edit(request, rule_id):
+    _require_doctor(request)
+
+    # Ownership check via the filter — wrong doctor = 404, not 403. Anti-enumeration.
+    rule = get_object_or_404(AvailabilityRule, id=rule_id, doctor=request.user)
+
+    if request.method == "POST":
+        form = AvailabilityRuleForm(request.POST, instance=rule)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Availability rule updated.")
+            return redirect("availability_list")
+    else:
+        form = AvailabilityRuleForm(instance=rule)
+
+    return render(request, "availability_form.html", {
+        "form": form,
+        "mode": "edit",
+        "rule": rule,
+    })
+
+
+@login_required
+def availability_delete(request, rule_id):
+    _require_doctor(request)
+    rule = get_object_or_404(AvailabilityRule, id=rule_id, doctor=request.user)
+
+    if request.method == "POST":
+        rule.delete()
+        messages.success(request, "Availability rule removed.")
+        return redirect("availability_list")
+
+    # GET → show the confirm page
+    return render(request, "availability_confirm_delete.html", {"rule": rule})
+
+
+
+
+
 
 
 from rest_framework import generics
@@ -43,15 +238,6 @@ class DoctorDetailAPIView(generics.RetrieveAPIView):
     lookup_url_kwarg = "doctor_id"
     
     
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-
-from .models import Appointment
-from .serializers import AppointmentSerializer
-from .services import create_booking
-
 
 class AppointmentCreateAPIView(APIView):
     permission_classes = [IsAuthenticated]

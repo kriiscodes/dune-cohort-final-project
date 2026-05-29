@@ -1,0 +1,19 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Admin{% endblock %}
+
+{% block dash_greeting %}Admin · {{ request.user.username }}{% endblock %}
+{% block dash_subgreeting %}System overview.{% endblock %}
+
+{% block content %}
+  <div class="dash-card">
+    <h2>Admin tools</h2>
+    <p>Use the Django admin to manage users, verify doctors, and review appointments.</p>
+    <a href="/admin/" class="btn btn-primary">Open Django admin</a>
+  </div>
+
+  <div class="dash-card">
+    <h2>No-show report</h2>
+    <p>View the staff no-show dashboard. <a href="{% url 'staff_dashboard' %}">Open report</a></p>
+  </div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base_marketing.html" %}
+{% load static %}
+
+{% block title %}Find a doctor{% endblock %}
+
+{% block content %}
+  <section class="section">
+    <div class="container">
+      <div class="section-heading">
+        <h2>Our verified doctors</h2>
+        <p>Browse doctors and book a slot that works for you.</p>
+      </div>
+
+      {% if doctors %}
+        <div class="card-grid">
+          {% for doctor in doctors %}
+            <a href="{% url 'doctor_detail' doctor.id %}" class="doctor-card">
+              <div class="doctor-card-photo">
+                {% if doctor.photo %}
+                  <img src="{{ doctor.photo.url }}" alt="Dr. {{ doctor.user.username }}">
+                {% else %}
+                  <div class="doctor-card-photo-placeholder">
+                    {{ doctor.user.username|first|upper }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="doctor-card-body">
+                <h3>Dr. {{ doctor.user.username }}</h3>
+                <p class="doctor-card-specialty">{{ doctor.specialty|default:"General Practice" }}</p>
+                {% if doctor.fee %}
+                  <p class="doctor-card-fee">From ₦{{ doctor.fee }}</p>
+                {% endif %}
+                <span class="btn btn-secondary">View availability →</span>
+              </div>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <h3>No doctors available yet</h3>
+          <p>We're onboarding verified doctors. Check back soon.</p>
+        </div>
+      {% endif %}
+    </div>
+  </section>
+{% endblock %}

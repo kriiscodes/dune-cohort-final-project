@@ -1,26 +1,23 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{% block title %}MediSlot{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}MediSlot{% endblock %} | MediSlot</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+  <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  {% block extra_head %}{% endblock %}
 </head>
 <body>
-  <nav>
-    <a href="/">Home</a>
- {% if request.user.is_authenticated %}
-  <span>Hi, {{ request.user.username }}</span>
-  <form method="post" action="/accounts/logout/" style="display:inline">
-    {% csrf_token %}
-    <button type="submit">Log out</button>
-  </form>
-{% else %}
-  <a href="/accounts/login/">Log in</a>
-  <a href="/accounts/signup/">Sign up</a>
-{% endif %}
-  </nav>
-
-  <main>
-    {% block content %}{% endblock %}
-  </main>
+  {% block body %}{% endblock %}
 </body>
 </html>

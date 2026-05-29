@@ -1,0 +1,50 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}My appointments{% endblock %}
+
+{% block dash_greeting %}Hi, {{ request.user.username }}{% endblock %}
+{% block dash_subgreeting %}Here's what's coming up.{% endblock %}
+
+{% block content %}
+  <div class="dash-banner">
+    <div>
+      <h2>Ready for your next visit?</h2>
+      <p>Browse verified doctors and book in under two minutes.</p>
+    </div>
+    <a href="{% url 'doctor_list' %}" class="btn btn-secondary btn-lg">Find a doctor</a>
+  </div>
+
+  <div class="dash-stats">
+    <div class="dash-stat">
+      <p class="dash-stat-label">Upcoming</p>
+      <p class="dash-stat-value">{{ upcoming.count }}</p>
+    </div>
+    <div class="dash-stat">
+      <p class="dash-stat-label">Completed</p>
+      <p class="dash-stat-value">{{ completed_count }}</p>
+    </div>
+    <div class="dash-stat">
+      <p class="dash-stat-label">Cancelled</p>
+      <p class="dash-stat-value">{{ cancelled_count }}</p>
+    </div>
+  </div>
+
+  <div class="dash-card">
+    <h2>Upcoming appointments</h2>
+    {% if upcoming %}
+      <ul class="appt-list">
+        {% for appt in upcoming %}
+          <li class="appt-item">
+            <div>
+              <strong>Dr. {{ appt.doctor.username }}</strong>
+              <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+            </div>
+            <span class="badge badge-{{ appt.status }}">{{ appt.get_status_display }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>You don't have any upcoming appointments yet. <a href="{% url 'doctor_list' %}">Find a doctor</a> to book your first one.</p>
+    {% endif %}
+  </div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base_marketing.html" %} {% load static %} {% block title %}Dr. {{
+doctor.user.username }}{% endblock %} {% block content %}
+<section class="section">
+  <div class="container">
+    <div class="detail-grid">
+      <!-- Left: doctor info -->
+      <aside class="detail-info">
+        <div class="detail-photo">
+          {% if doctor.photo %}
+          <img
+            src="{{ doctor.photo.url }}"
+            alt="Dr. {{ doctor.user.username }}"
+          />
+          {% else %}
+          <div class="doctor-card-photo-placeholder">
+            {{ doctor.user.username|first|upper }}
+          </div>
+          {% endif %}
+        </div>
+        <h1>Dr. {{ doctor.user.username }}</h1>
+        <p class="detail-specialty">
+          {{ doctor.specialty|default:"General Practice" }}
+        </p>
+        {% if doctor.fee %}
+        <p class="detail-fee">
+          Consultation fee: <strong>₦{{ doctor.fee }}</strong>
+        </p>
+        {% endif %} {% if doctor.bio %}
+        <div class="detail-bio">
+          <h3>About</h3>
+          <p>{{ doctor.bio }}</p>
+        </div>
+        {% endif %}
+      </aside>
+      {% if request.user.is_authenticated and request.user.role != 'patient' %}
+      <div class="detail-booking">
+        <div class="dash-card">
+          <h2>Booking is patient-only</h2>
+          <p>
+            You're signed in as a {{ request.user.role }}. MediSlot's booking
+            flow is for patients.
+          </p>
+        </div>
+      </div>
+      {% else %}
+      <div class="detail-booking">
+        <div class="dash-card">
+          <h2>Pick a date</h2>
+          <input
+            type="date"
+            name="date"
+            value="{{ today|date:'Y-m-d' }}"
+            min="{{ today|date:'Y-m-d' }}"
+            class="detail-date-input"
+            hx-get="{% url 'doctor_slots_partial' doctor.id %}"
+            hx-trigger="change"
+            hx-target="#slots-container"
+            hx-swap="innerHTML"
+          />
+        </div>
+
+        <div class="dash-card">
+          <h2>Available slots</h2>
+          <div id="slots-container">
+            {% include "partials/_slots.html" with slots=slots
+            selected_date=today doctor=doctor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
