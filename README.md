@@ -1,5 +1,7 @@
 # MediSlot
 
+**Live demo:** https://medislot-b0cf.onrender.com
+
 A doctor-appointment booking app built with Django. Doctors publish the hours
 they're available, patients find a doctor and grab an open slot, and the whole
 thing keeps itself honest — no double-booking the same time, no booking with a
@@ -126,8 +128,8 @@ On Render you point a Web Service at this repo with:
   | `DEBUG` | `False` |
   | `DATABASE_URL` | your Supabase connection string |
   | `CLOUDINARY_URL` | `cloudinary://key:secret@cloud-name` |
-  | `ALLOWED_HOSTS` | `medislot-abcd.onrender.com` (your Render hostname, no `https://`) |
-  | `CSRF_TRUSTED_ORIGINS` | `https://medislot-abcd.onrender.com` (same host, with `https://`) |
+  | `ALLOWED_HOSTS` | `medislot-b0cf.onrender.com` (your Render hostname, no `https://`) |
+  | `CSRF_TRUSTED_ORIGINS` | `https://medislot-b0cf.onrender.com` (same host, with `https://`) |
 
 ---
 
