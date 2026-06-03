@@ -3,7 +3,7 @@
 Local: `http://127.0.0.1:8000` — production URL goes here once it's on Render.
 
 Everything returns JSON. The two write endpoints need a token; grab one by POSTing
-your login to `/api/auth/token/`, then send it on every authed request as a header:
+your login to `/api/token/`, then send it on every authed request as a header:
 `Authorization: Token <whatever-you-got-back>`.
 
 ## Doctors (public, no auth)
