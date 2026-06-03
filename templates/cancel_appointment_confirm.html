@@ -1,0 +1,30 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Cancel appointment{% endblock %}
+
+{% block dash_greeting %}Cancel appointment{% endblock %}
+{% block dash_subgreeting %}Confirm before this booking is cancelled.{% endblock %}
+
+{% block content %}
+  <div class="dash-card" style="max-width: 560px;">
+    <h2>Are you sure?</h2>
+    <p>This will cancel your appointment with Dr. {{ appointment.doctor.username }}. You can rebook another slot if you change your mind.</p>
+
+    <ul class="appt-list">
+      <li class="appt-item">
+        <div>
+          <strong>Dr. {{ appointment.doctor.username }}</strong>
+          <p class="appt-time">{{ appointment.scheduled_for|date:"l, j F · H:i" }}</p>
+        </div>
+        <span class="badge badge-booked">Booked</span>
+      </li>
+    </ul>
+
+    <form method="post" style="display:flex; gap:12px; margin-top:24px;">
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <button type="submit" class="btn btn-primary">Cancel appointment</button>
+      <a href="{% if next %}{{ next }}{% else %}{% url 'appointments_list' %}{% endif %}" class="btn btn-ghost">Keep it</a>
+    </form>
+  </div>
+{% endblock %}

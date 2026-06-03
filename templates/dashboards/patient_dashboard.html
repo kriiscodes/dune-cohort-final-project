@@ -6,45 +6,63 @@
 {% block dash_subgreeting %}Here's what's coming up.{% endblock %}
 
 {% block content %}
-  <div class="dash-banner">
-    <div>
-      <h2>Ready for your next visit?</h2>
-      <p>Browse verified doctors and book in under two minutes.</p>
-    </div>
-    <a href="{% url 'doctor_list' %}" class="btn btn-secondary btn-lg">Find a doctor</a>
-  </div>
+  <div class="dash-grid">
+    <div class="dash-col-main">
+      <section class="dash-banner">
+        <span class="dash-banner-chip">
+          <i class="fa-regular fa-calendar"></i> {{ today|date:"j M Y" }}
+        </span>
+        <h2>Ready for your next visit?</h2>
+        <p>Browse verified doctors and book in under two minutes.</p>
+        <a href="{% url 'doctor_list' %}" class="btn btn-secondary">Find a doctor</a>
+      </section>
 
-  <div class="dash-stats">
-    <div class="dash-stat">
-      <p class="dash-stat-label">Upcoming</p>
-      <p class="dash-stat-value">{{ upcoming.count }}</p>
-    </div>
-    <div class="dash-stat">
-      <p class="dash-stat-label">Completed</p>
-      <p class="dash-stat-value">{{ completed_count }}</p>
-    </div>
-    <div class="dash-stat">
-      <p class="dash-stat-label">Cancelled</p>
-      <p class="dash-stat-value">{{ cancelled_count }}</p>
-    </div>
-  </div>
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <p class="dash-stat-label">Upcoming</p>
+          <p class="dash-stat-value">{{ upcoming.count }}</p>
+          <p class="dash-stat-sub">Booked appointments</p>
+        </div>
+        <div class="dash-stat">
+          <p class="dash-stat-label">Completed</p>
+          <p class="dash-stat-value">{{ completed_count }}</p>
+          <p class="dash-stat-sub">All-time visits</p>
+        </div>
+        <div class="dash-stat">
+          <p class="dash-stat-label">Cancelled</p>
+          <p class="dash-stat-value">{{ cancelled_count }}</p>
+          <p class="dash-stat-sub">All-time</p>
+        </div>
+      </div>
 
-  <div class="dash-card">
-    <h2>Upcoming appointments</h2>
-    {% if upcoming %}
-      <ul class="appt-list">
-        {% for appt in upcoming %}
-          <li class="appt-item">
-            <div>
-              <strong>Dr. {{ appt.doctor.username }}</strong>
-              <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
-            </div>
-            <span class="badge badge-{{ appt.status }}">{{ appt.get_status_display }}</span>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>You don't have any upcoming appointments yet. <a href="{% url 'doctor_list' %}">Find a doctor</a> to book your first one.</p>
-    {% endif %}
+      <div class="dash-card">
+        <div class="dash-card-head">
+          <h2>Upcoming appointments</h2>
+          <a href="{% url 'appointments_list' %}" class="btn btn-secondary btn-sm">View all</a>
+        </div>
+        {% if upcoming %}
+          <ul class="appt-list">
+            {% for appt in upcoming %}
+              <li class="appt-item">
+                <div>
+                  <strong>Dr. {{ appt.doctor.username }}</strong>
+                  <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+                </div>
+                <div class="appt-actions">
+                  <span class="badge badge-{{ appt.status }}">{{ appt.get_status_display }}</span>
+                  <a href="{% url 'cancel_appointment' appt.id %}?next={% url 'dashboard' %}" class="btn btn-ghost btn-sm">Cancel</a>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>You don't have any upcoming appointments yet. <a href="{% url 'doctor_list' %}">Find a doctor</a> to book your first one.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <aside class="dash-col-side">
+      {% include "partials/_profile_card.html" %}
+    </aside>
   </div>
 {% endblock %}

@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import User
+from .models import User, DoctorProfile
 
 
 class SignUpForm(UserCreationForm):
@@ -10,3 +10,21 @@ class SignUpForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = User
         fields = ("username", "email")
+
+
+class UserProfileForm(forms.ModelForm):
+    email = forms.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ("username", "email", "first_name", "last_name")
+
+
+class DoctorProfileForm(forms.ModelForm):
+    class Meta:
+        model = DoctorProfile
+        # is_verified is admin-only — never expose it as an editable field.
+        fields = ("specialty", "bio", "fee", "photo")
+        widgets = {
+            "bio": forms.Textarea(attrs={"rows": 4}),
+        }

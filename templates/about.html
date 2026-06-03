@@ -1,10 +1,65 @@
 {% extends "base_marketing.html" %}
+{% load static %}
+
 {% block title %}About{% endblock %}
+
 {% block content %}
-  <section class="section">
+  <section class="about-page">
     <div class="container">
-      <h1>About MediSlot</h1>
-      <p>Coming soon.</p>
+
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">About</span>
+      </nav>
+
+      <div class="started">
+        <div class="started-text">
+          <p class="started-eyebrow">About MediSlot</p>
+          <h1 class="started-heading">Built to make booking care effortless</h1>
+          <p class="started-body">MediSlot began with a simple frustration: finding a doctor and booking a visit meant too many phone calls, too much waiting, and too little clarity. We set out to fix that — one place to browse verified doctors, see real-time availability, and confirm a slot in seconds. Today MediSlot connects patients with trusted care that fits around their day, not the other way around.</p>
+        </div>
+
+        <div class="started-visual">
+          <div class="started-image">
+            <img src="{% static 'images/about-team.jpg' %}" alt="The MediSlot team">
+          </div>
+
+          <div class="started-stats">
+            <div class="started-stat">
+              <strong>200+</strong>
+              <span>Verified doctors</span>
+            </div>
+            <div class="started-stat">
+              <strong>&lt; 2 min</strong>
+              <span>Avg booking time</span>
+            </div>
+            <div class="started-stat">
+              <strong>4.9 / 5</strong>
+              <span>Patient rating</span>
+            </div>
+            <div class="started-stat">
+              <strong>24/7</strong>
+              <span>Online access</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="about-mission">
+        <h2>Care that fits your schedule, not the other way around.</h2>
+        <div class="about-mission-content">
+          <div>
+            <p class="about-mission-label">OUR VISION</p>
+            <p>To be the most trusted healthcare-booking platform — where every patient can find verified care that works around their day, not the other way around.</p>
+          </div>
+          <div>
+            <p class="about-mission-label">OUR MISSION</p>
+            <p>To remove every barrier between patients and verified care. Real-time slots, instant confirmations, no more phone tag.</p>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 {% endblock %}

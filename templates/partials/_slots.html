@@ -12,7 +12,7 @@
            <span class="slot-btn slot-btn-locked">{{ slot|date:"H:i" }}</span>  {# disabled #}
       {% else %}
         <a href="{% url 'login' %}?next={% url 'doctor_detail' doctor.id %}" class="slot-btn slot-btn-locked">
-          {{ slot|date:"H:i" }} 🔒
+          {{ slot|date:"H:i" }} <i class="fa-solid fa-lock"></i>
         </a>
       {% endif %}
     {% endfor %}

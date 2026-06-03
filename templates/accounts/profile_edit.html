@@ -1,0 +1,67 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Edit profile{% endblock %}
+
+{% block dash_greeting %}Edit profile{% endblock %}
+{% block dash_subgreeting %}Update your account details.{% endblock %}
+
+{% block content %}
+  <div class="dash-card" style="max-width: 640px;">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <h2 style="font-size:16px;">Account</h2>
+
+      {% if user_form.non_field_errors %}
+        <ul class="errorlist">
+          {% for error in user_form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+        </ul>
+      {% endif %}
+
+      {% for field in user_form %}
+        <div class="form-field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+          {% if field.errors %}
+            <ul class="errorlist">
+              {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      {% if doctor_form %}
+        <h2 style="font-size:16px; margin-top:24px;">Doctor details</h2>
+
+        {% if not doctor_profile.is_verified %}
+          <p>Verification status is set by admins and can't be edited here.</p>
+        {% endif %}
+
+        {% if doctor_form.non_field_errors %}
+          <ul class="errorlist">
+            {% for error in doctor_form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        {% endif %}
+
+        {% for field in doctor_form %}
+          <div class="form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+            {% if field.errors %}
+              <ul class="errorlist">
+                {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div style="display:flex; gap:12px; margin-top:24px;">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a href="{% url 'profile' %}" class="btn btn-ghost">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

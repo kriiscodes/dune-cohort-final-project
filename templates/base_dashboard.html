@@ -2,47 +2,59 @@
 {% load static %}
 
 {% block body %}
-<div class="dash">
-  <aside class="dash-sidebar">
-    <a href="{% url 'home' %}" class="dash-logo">
-      <span class="nav-logo-mark">+</span>
-    </a>
+<div class="dash" x-data="{ open: false }" @keydown.escape.window="open = false">
+  <aside class="dash-sidebar" :class="{ 'is-open': open }">
+    <button type="button" class="menu-close" @click="open = false" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
 
+    {% with url_name=request.resolver_match.url_name %}
     <nav class="dash-nav">
-      <a href="{% url 'dashboard' %}" class="dash-nav-link" title="Dashboard">
-        <span class="dash-nav-icon">🏠</span>
+      <a href="{% url 'dashboard' %}" class="dash-nav-link {% if url_name == 'dashboard' %}active{% endif %}" title="Dashboard">
+        <span class="dash-nav-icon"><i class="fa-solid fa-house"></i></span>
       </a>
-      <a href="{% url 'dashboard' %}" class="dash-nav-link" title="Appointments">
-        <span class="dash-nav-icon">📅</span>
-      </a>
-      {% if request.user.role == 'doctor' %}
-        <a href="{% url 'dashboard' %}" class="dash-nav-link" title="Schedule">
-          <span class="dash-nav-icon">🗓️</span>
+
+      {% if request.user.role == 'patient' or request.user.role == 'doctor' %}
+        <a href="{% url 'appointments_list' %}" class="dash-nav-link {% if url_name == 'appointments_list' %}active{% endif %}" title="Appointments">
+          <span class="dash-nav-icon"><i class="fa-solid fa-calendar-check"></i></span>
         </a>
       {% endif %}
-      <a href="{% url 'dashboard' %}" class="dash-nav-link" title="Profile">
-        <span class="dash-nav-icon">👤</span>
+
+      {% if request.user.role == 'doctor' %}
+        <a href="{% url 'availability_list' %}" class="dash-nav-link {% if url_name == 'availability_list' or url_name == 'availability_create' or url_name == 'availability_edit' or url_name == 'availability_delete' %}active{% endif %}" title="Schedule">
+          <span class="dash-nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+        </a>
+      {% endif %}
+
+      <a href="{% url 'profile' %}" class="dash-nav-link {% if url_name == 'profile' or url_name == 'profile_edit' %}active{% endif %}" title="Profile">
+        <span class="dash-nav-icon"><i class="fa-solid fa-user"></i></span>
       </a>
     </nav>
+    {% endwith %}
 
     <form method="post" action="{% url 'logout' %}" class="dash-logout">
       {% csrf_token %}
       <button type="submit" class="dash-nav-link" title="Log out">
-        <span class="dash-nav-icon">↪</span>
+        <span class="dash-nav-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
       </button>
     </form>
   </aside>
 
+  <div class="menu-backdrop" :class="{ 'is-open': open }" @click="open = false"></div>
+
   <main class="dash-main">
     <header class="dash-header">
+      <button type="button" class="menu-toggle" @click="open = true" aria-label="Open menu" :aria-expanded="open">
+        <i class="fa-solid fa-bars"></i>
+      </button>
       <div>
         <h1 class="dash-greeting">{% block dash_greeting %}Welcome, {{ request.user.username }}{% endblock %}</h1>
         <p class="dash-subgreeting">{% block dash_subgreeting %}Have a nice day at work.{% endblock %}</p>
       </div>
-      <div class="dash-userchip">
-        <span class="dash-userchip-name">{{ request.user.username }}</span>
-        <span class="badge badge-{{ request.user.role }}">{{ request.user.role }}</span>
-      </div>
+      <a href="{% url 'home' %}" class="dash-userchip" title="Back to site">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span class="dash-userchip-name">Back to site</span>
+      </a>
     </header>
 
     {% if messages %}

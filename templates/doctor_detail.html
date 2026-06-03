@@ -1,74 +1,242 @@
-{% extends "base_marketing.html" %} {% load static %} {% block title %}Dr. {{
-doctor.user.username }}{% endblock %} {% block content %}
-<section class="section">
-  <div class="container">
-    <div class="detail-grid">
-      <!-- Left: doctor info -->
-      <aside class="detail-info">
-        <div class="detail-photo">
-          {% if doctor.photo %}
-          <img
-            src="{{ doctor.photo.url }}"
-            alt="Dr. {{ doctor.user.username }}"
-          />
-          {% else %}
-          <div class="doctor-card-photo-placeholder">
-            {{ doctor.user.username|first|upper }}
-          </div>
-          {% endif %}
-        </div>
-        <h1>Dr. {{ doctor.user.username }}</h1>
-        <p class="detail-specialty">
-          {{ doctor.specialty|default:"General Practice" }}
-        </p>
-        {% if doctor.fee %}
-        <p class="detail-fee">
-          Consultation fee: <strong>₦{{ doctor.fee }}</strong>
-        </p>
-        {% endif %} {% if doctor.bio %}
-        <div class="detail-bio">
-          <h3>About</h3>
-          <p>{{ doctor.bio }}</p>
-        </div>
-        {% endif %}
-      </aside>
-      {% if request.user.is_authenticated and request.user.role != 'patient' %}
-      <div class="detail-booking">
-        <div class="dash-card">
-          <h2>Booking is patient-only</h2>
-          <p>
-            You're signed in as a {{ request.user.role }}. MediSlot's booking
-            flow is for patients.
-          </p>
-        </div>
-      </div>
-      {% else %}
-      <div class="detail-booking">
-        <div class="dash-card">
-          <h2>Pick a date</h2>
-          <input
-            type="date"
-            name="date"
-            value="{{ today|date:'Y-m-d' }}"
-            min="{{ today|date:'Y-m-d' }}"
-            class="detail-date-input"
-            hx-get="{% url 'doctor_slots_partial' doctor.id %}"
-            hx-trigger="change"
-            hx-target="#slots-container"
-            hx-swap="innerHTML"
-          />
-        </div>
+{% extends "base_marketing.html" %}
+{% load static %}
 
-        <div class="dash-card">
-          <h2>Available slots</h2>
-          <div id="slots-container">
-            {% include "partials/_slots.html" with slots=slots
-            selected_date=today doctor=doctor %}
+{% block title %}Dr. {{ doctor.user.username }}{% endblock %}
+
+{% block content %}
+  <section class="section" style="padding-top: 24px;">
+    <div class="container">
+
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="{% url 'doctor_list' %}">Doctors</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">Dr. {{ doctor.user.username }}</span>
+      </nav>
+
+      <div class="detail-grid">
+        <aside class="detail-info">
+          <div class="detail-photo">
+            {% if doctor.photo %}
+              <img src="{{ doctor.photo.url }}" alt="Dr. {{ doctor.user.username }}">
+            {% else %}
+              <div class="doctor-card-photo-placeholder">{{ doctor.user.username|first|upper }}</div>
+            {% endif %}
           </div>
-        </div>
+
+          <div class="detail-info-body">
+            <h1 class="detail-name">
+              Dr. {{ doctor.user.username }}
+              {% if doctor.is_verified %}
+                <span class="detail-verified" title="Verified doctor"><i class="fa-solid fa-circle-check"></i></span>
+              {% endif %}
+            </h1>
+            <p class="detail-specialty">{{ doctor.specialty|default:"General Practice" }}</p>
+
+            {% if doctor.bio %}
+              <p class="detail-bio-text">{{ doctor.bio }}</p>
+            {% endif %}
+
+            <div class="detail-stats-row">
+              <div class="detail-stats">
+                {% if doctor.fee %}
+                  <div class="detail-stat">
+                    <i class="fa-solid fa-coins"></i>
+                    <strong>₦{{ doctor.fee }}</strong>
+                  </div>
+                {% endif %}
+                <div class="detail-stat">
+                  <i class="fa-solid fa-calendar-check"></i>
+                  <strong>Available</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {% if request.user.is_authenticated and request.user.role != 'patient' %}
+          <div class="detail-booking">
+            <div class="dash-card">
+              <h2>Booking is patient-only</h2>
+              <p>You're signed in as a {{ request.user.role }}. MediSlot's booking flow is for patients.</p>
+            </div>
+          </div>
+        {% else %}
+          <div class="detail-booking">
+            <div class="dash-card">
+              <h2>Pick a date</h2>
+
+              <div
+                class="calendar"
+                x-data="bookingCalendar({
+                  today: '{{ today|date:'Y-m-d' }}',
+                  slotsUrl: '{% url 'doctor_slots_partial' doctor.id %}'
+                })"
+                @click.outside="open = false"
+                @keydown.escape.window="open = false"
+              >
+                <button
+                  type="button"
+                  class="cal-trigger"
+                  @click="open = !open"
+                  :aria-expanded="open.toString()"
+                >
+                  <i class="fa-solid fa-calendar-day cal-trigger-icon"></i>
+                  <span class="cal-trigger-label" x-text="selectedLabel"></span>
+                  <i class="fa-solid fa-chevron-down cal-trigger-caret" :class="{ 'is-open': open }"></i>
+                </button>
+
+                <div
+                  class="cal-popover"
+                  x-show="open"
+                  x-cloak
+                  x-transition
+                >
+                  <div class="cal-header">
+                    <button
+                      type="button"
+                      class="cal-nav"
+                      @click="prevMonth()"
+                      :disabled="!canGoPrev()"
+                      aria-label="Previous month"
+                    >
+                      <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <span class="cal-month" x-text="monthLabel"></span>
+                    <button
+                      type="button"
+                      class="cal-nav"
+                      @click="nextMonth()"
+                      aria-label="Next month"
+                    >
+                      <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                  </div>
+
+                  <div class="cal-weekdays">
+                    <template x-for="wd in weekdays" :key="wd">
+                      <span x-text="wd"></span>
+                    </template>
+                  </div>
+
+                  <div class="cal-grid">
+                    <template x-for="(d, i) in days" :key="i">
+                      <button
+                        type="button"
+                        class="cal-day"
+                        x-text="d ? d.getDate() : ''"
+                        :class="{
+                          'is-empty': !d,
+                          'is-today': d && isToday(d),
+                          'is-selected': d && isSelected(d),
+                          'is-past': d && isPast(d)
+                        }"
+                        :disabled="!d || isPast(d)"
+                        @click="pick(d)"
+                      ></button>
+                    </template>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dash-card">
+              <h2>Available slots</h2>
+              <div id="slots-container">
+                {% include "partials/_slots.html" with slots=slots selected_date=today doctor=doctor %}
+              </div>
+            </div>
+          </div>
+        {% endif %}
       </div>
-      {% endif %}
     </div>
-  </div>
-</section>
+  </section>
+
+  <script>
+    document.addEventListener('alpine:init', () => {
+      Alpine.data('bookingCalendar', (config) => ({
+        open: false,
+        today: null,
+        selected: null,
+        viewYear: 0,
+        viewMonth: 0,
+        slotsUrl: config.slotsUrl,
+        months: ['January', 'February', 'March', 'April', 'May', 'June',
+                 'July', 'August', 'September', 'October', 'November', 'December'],
+        weekdays: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+
+        init() {
+          this.today = this.parse(config.today);
+          this.selected = this.parse(config.today);
+          this.viewYear = this.selected.getFullYear();
+          this.viewMonth = this.selected.getMonth();
+        },
+
+        parse(s) {
+          const [y, m, d] = s.split('-').map(Number);
+          return new Date(y, m - 1, d);
+        },
+        fmt(d) {
+          return d.getFullYear() + '-' +
+            String(d.getMonth() + 1).padStart(2, '0') + '-' +
+            String(d.getDate()).padStart(2, '0');
+        },
+        sameDay(a, b) {
+          return a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate();
+        },
+
+        get monthLabel() {
+          return this.months[this.viewMonth] + ' ' + this.viewYear;
+        },
+        get selectedLabel() {
+          return this.selected.toLocaleDateString('en-GB', {
+            weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+          });
+        },
+        get days() {
+          const first = new Date(this.viewYear, this.viewMonth, 1);
+          const startDow = (first.getDay() + 6) % 7; // Monday = 0
+          const total = new Date(this.viewYear, this.viewMonth + 1, 0).getDate();
+          const cells = [];
+          for (let i = 0; i < startDow; i++) cells.push(null);
+          for (let d = 1; d <= total; d++) cells.push(new Date(this.viewYear, this.viewMonth, d));
+          return cells;
+        },
+
+        isPast(d) { return d < this.today; },
+        isToday(d) { return this.sameDay(d, this.today); },
+        isSelected(d) { return this.sameDay(d, this.selected); },
+
+        canGoPrev() {
+          const viewStart = new Date(this.viewYear, this.viewMonth, 1);
+          const todayStart = new Date(this.today.getFullYear(), this.today.getMonth(), 1);
+          return viewStart > todayStart;
+        },
+        prevMonth() {
+          if (!this.canGoPrev()) return;
+          const d = new Date(this.viewYear, this.viewMonth - 1, 1);
+          this.viewYear = d.getFullYear();
+          this.viewMonth = d.getMonth();
+        },
+        nextMonth() {
+          const d = new Date(this.viewYear, this.viewMonth + 1, 1);
+          this.viewYear = d.getFullYear();
+          this.viewMonth = d.getMonth();
+        },
+
+        pick(d) {
+          if (!d || this.isPast(d)) return;
+          this.selected = d;
+          this.open = false;
+          htmx.ajax('GET', this.slotsUrl + '?date=' + this.fmt(d), {
+            target: '#slots-container',
+            swap: 'innerHTML'
+          });
+        },
+      }));
+    });
+  </script>
 {% endblock %}

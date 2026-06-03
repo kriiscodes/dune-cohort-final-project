@@ -5,21 +5,21 @@ from appointments.models import AvailabilityRule, Appointment
 from django.core.exceptions import PermissionDenied, ValidationError
 
 
-def get_available_slots(doctor, date):
-    rules = AvailabilityRule.objects.filter(doctor=doctor,weekday=date.weekday())
-    taken = Appointment.objects.filter(doctor=doctor,status="booked",scheduled_for__date=date,)
-    taken_times = {appt.scheduled_for for appt in taken} 
-    slots = []
-    for rule in rules:
-        cursor = timezone.make_aware(datetime.combine(date, rule.start_time))
-        closing = timezone.make_aware(datetime.combine(date, rule.end_time))
-        duration = timedelta(minutes=rule.slot_duration)
+# def get_available_slots(doctor, date):
+#     rules = AvailabilityRule.objects.filter(doctor=doctor,weekday=date.weekday())
+#     taken = Appointment.objects.filter(doctor=doctor,status="booked",scheduled_for__date=date,)
+#     taken_times = {appt.scheduled_for for appt in taken} 
+#     slots = []
+#     for rule in rules:
+#         cursor = timezone.make_aware(datetime.combine(date, rule.start_time))
+#         closing = timezone.make_aware(datetime.combine(date, rule.end_time))
+#         duration = timedelta(minutes=rule.slot_duration)
 
-        while cursor + duration <= closing:
-            if cursor not in taken_times:
-                slots.append(cursor)
-            cursor += duration
-    return slots
+#         while cursor + duration <= closing:
+#             if cursor not in taken_times:
+#                 slots.append(cursor)
+#             cursor += duration
+#     return slots
 
 
 
@@ -114,5 +114,30 @@ def mark_appointment_no_show(appointment, actor):
         raise ValidationError("Can't mark no-show: appointment is still in the future.")
     
     appointment.status = Appointment.Status.NO_SHOW
+    appointment.save(update_fields=["status"])
+    return appointment
+
+
+def cancel_appointment(appointment, actor):
+    """
+    Transition: booked -> cancelled.
+
+    Only the patient who booked the appointment can cancel it (the doctor uses
+    no-show / complete for post-visit close-out — distinct semantics).
+    Only future appointments can be cancelled — once the slot has passed,
+    the doctor needs to mark complete or no-show instead.
+    """
+    if appointment.patient != actor:
+        raise PermissionDenied("You can't cancel another patient's appointment.")
+
+    if appointment.status != Appointment.Status.BOOKED:
+        raise ValidationError(
+            f"Can't cancel: appointment is {appointment.status}, not booked."
+        )
+
+    if appointment.scheduled_for <= timezone.now():
+        raise ValidationError("Can't cancel an appointment that's already started or passed.")
+
+    appointment.status = Appointment.Status.CANCELLED
     appointment.save(update_fields=["status"])
     return appointment

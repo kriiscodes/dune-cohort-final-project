@@ -1,0 +1,62 @@
+{% load static %}
+<aside class="dash-profile">
+  <div class="dash-profile-header">
+    <h3>My profile</h3>
+    <a href="{% url 'profile_edit' %}" class="dash-profile-edit" title="Edit profile">
+      <i class="fa-solid fa-pen"></i>
+    </a>
+  </div>
+  <div class="dash-profile-body">
+    <div class="dash-profile-avatar">
+      {% if request.user.role == 'doctor' and request.user.doctor_profile.photo %}
+        <img src="{{ request.user.doctor_profile.photo.url }}" alt="">
+      {% else %}
+        {{ request.user.username|slice:":1"|upper }}
+      {% endif %}
+    </div>
+
+    <p class="dash-profile-name">
+      {% if request.user.role == 'doctor' %}Dr. {{ request.user.username }}
+      {% else %}{{ request.user.username }}
+      {% endif %}
+    </p>
+    <p class="dash-profile-sub">
+      {% if request.user.role == 'doctor' %}{{ request.user.doctor_profile.specialty|default:"Doctor" }}
+      {% else %}{{ request.user.get_role_display }}
+      {% endif %}
+    </p>
+
+    <div class="dash-profile-facts">
+      {% if request.user.role == 'doctor' %}
+        <div>
+          <p class="dash-profile-fact-label">Fee</p>
+          <p class="dash-profile-fact-value">
+            {% if request.user.doctor_profile.fee is not None %}₦{{ request.user.doctor_profile.fee }}
+            {% else %}—{% endif %}
+          </p>
+        </div>
+        <div>
+          <p class="dash-profile-fact-label">Status</p>
+          <p class="dash-profile-fact-value">
+            {% if request.user.doctor_profile.is_verified %}
+              <span class="badge badge-completed">Verified</span>
+            {% else %}
+              <span class="badge badge-no-show">Pending</span>
+            {% endif %}
+          </p>
+        </div>
+      {% else %}
+        <div>
+          <p class="dash-profile-fact-label">Role</p>
+          <p class="dash-profile-fact-value">
+            <span class="badge badge-{{ request.user.role }}">{{ request.user.get_role_display }}</span>
+          </p>
+        </div>
+        <div>
+          <p class="dash-profile-fact-label">Joined</p>
+          <p class="dash-profile-fact-value">{{ request.user.date_joined|date:"M Y" }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</aside>

@@ -6,14 +6,29 @@
 {% block dash_subgreeting %}System overview.{% endblock %}
 
 {% block content %}
-  <div class="dash-card">
-    <h2>Admin tools</h2>
-    <p>Use the Django admin to manage users, verify doctors, and review appointments.</p>
-    <a href="/admin/" class="btn btn-primary">Open Django admin</a>
-  </div>
+  <div class="dash-grid">
+    <div class="dash-col-main">
+      <section class="dash-banner">
+        <span class="dash-banner-chip">
+          <i class="fa-regular fa-calendar"></i> {{ today|date:"j M Y" }}
+        </span>
+        <h2>Welcome, {{ request.user.username }}</h2>
+        <p>Verify doctors and review activity from your tools below.</p>
+      </section>
 
-  <div class="dash-card">
-    <h2>No-show report</h2>
-    <p>View the staff no-show dashboard. <a href="{% url 'staff_dashboard' %}">Open report</a></p>
+      {% if request.user.is_staff %}
+        <div class="dash-card">
+          <div class="dash-card-head">
+            <h2>Doctor verification</h2>
+            <a href="{% url 'doctor_verification' %}" class="btn btn-secondary btn-sm">Open queue</a>
+          </div>
+          <p>Approve newly signed-up doctors so they appear in patient search.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <aside class="dash-col-side">
+      {% include "partials/_profile_card.html" %}
+    </aside>
   </div>
 {% endblock %}

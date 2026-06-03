@@ -4,8 +4,26 @@
 {% block title %}Find a doctor{% endblock %}
 
 {% block content %}
-  <section class="section">
+  <section class="section" style="padding-top: 24px;">
     <div class="container">
+      <div class="page-top">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a href="{% url 'home' %}">Home</a>
+          <span class="breadcrumb-sep">/</span>
+          <span class="breadcrumb-current">Doctors</span>
+        </nav>
+
+        <form method="get" class="doctor-filter" role="search">
+          <div class="doctor-filter-field">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="q" placeholder="Search by name, specialty or fee" value="{{ filters.q }}">
+          </div>
+          {% if filters_applied %}
+            <a href="{% url 'doctor_list' %}" class="doctor-filter-clear" title="Clear">×</a>
+          {% endif %}
+        </form>
+      </div>
+
       <div class="section-heading">
         <h2>Our verified doctors</h2>
         <p>Browse doctors and book a slot that works for you.</p>
@@ -15,30 +33,33 @@
         <div class="card-grid">
           {% for doctor in doctors %}
             <a href="{% url 'doctor_detail' doctor.id %}" class="doctor-card">
-              <div class="doctor-card-photo">
+              <div class="doctor-card-bg">
                 {% if doctor.photo %}
                   <img src="{{ doctor.photo.url }}" alt="Dr. {{ doctor.user.username }}">
                 {% else %}
-                  <div class="doctor-card-photo-placeholder">
-                    {{ doctor.user.username|first|upper }}
-                  </div>
+                  <div class="doctor-card-placeholder">{{ doctor.user.username|first|upper }}</div>
                 {% endif %}
               </div>
-              <div class="doctor-card-body">
-                <h3>Dr. {{ doctor.user.username }}</h3>
-                <p class="doctor-card-specialty">{{ doctor.specialty|default:"General Practice" }}</p>
-                {% if doctor.fee %}
-                  <p class="doctor-card-fee">From ₦{{ doctor.fee }}</p>
-                {% endif %}
-                <span class="btn btn-secondary">View availability →</span>
+
+              <div class="doctor-card-overlay">
+                <div class="doctor-card-meta">
+                  <strong>Dr. {{ doctor.user.username }}</strong>
+                  <span>{{ doctor.specialty|default:"General Practice" }}{% if doctor.fee %} · ₦{{ doctor.fee }}{% endif %}</span>
+                </div>
+                <span class="doctor-card-cta"><i class="fa-solid fa-arrow-right"></i></span>
               </div>
             </a>
           {% endfor %}
         </div>
       {% else %}
         <div class="empty-state">
-          <h3>No doctors available yet</h3>
-          <p>We're onboarding verified doctors. Check back soon.</p>
+          {% if filters_applied %}
+            <h3>No doctors match your filters</h3>
+            <p>Try widening the search or <a href="{% url 'doctor_list' %}">clear all filters</a>.</p>
+          {% else %}
+            <h3>No doctors available yet</h3>
+            <p>We're onboarding verified doctors. Check back soon.</p>
+          {% endif %}
         </div>
       {% endif %}
     </div>

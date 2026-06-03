@@ -14,6 +14,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from accounts import views as accounts_views
@@ -23,5 +25,11 @@ urlpatterns = [
     path("accounts/signup/", accounts_views.signup, name="signup"),
     path('accounts/', include('django.contrib.auth.urls')),
     path("dashboard/", accounts_views.dashboard_view, name="dashboard"),
+    path("profile/", accounts_views.profile_view, name="profile"),
+    path("profile/edit/", accounts_views.profile_edit, name="profile_edit"),
+    path("staff/verify-doctors/", accounts_views.doctor_verification, name="doctor_verification"),
     path("", include("appointments.urls")),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

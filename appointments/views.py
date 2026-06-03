@@ -10,8 +10,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Appointment, AvailabilityRule
 from .serializers import AppointmentSerializer
-from .services import create_booking, get_available_slots,mark_appointment_completed, mark_appointment_no_show
+from .services import create_booking, get_available_slots,mark_appointment_completed, mark_appointment_no_show, cancel_appointment
 from datetime import date, datetime
+from django.utils import timezone
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import HttpResponseNotAllowed, Http404
@@ -26,8 +27,24 @@ def about(request):
 
 
 def doctor_list(request):
+    q = request.GET.get("q", "").strip()
+
     doctors = DoctorProfile.objects.filter(is_verified=True).select_related("user")
-    return render(request, "doctor_list.html", {"doctors": doctors})
+
+    if q:
+        from django.db.models import Q
+        query = Q(user__username__icontains=q) | Q(specialty__icontains=q)
+        try:
+            query |= Q(fee__lte=int(q))
+        except ValueError:
+            pass
+        doctors = doctors.filter(query)
+
+    return render(request, "doctor_list.html", {
+        "doctors": doctors,
+        "filters": {"q": q},
+        "filters_applied": bool(q),
+    })
 
 
 def doctor_detail(request, doctor_id):
@@ -125,6 +142,32 @@ def mark_complete_view(request, appointment_id):
 
 
 @login_required
+def cancel_appointment_view(request, appointment_id):
+    # Ownership check via the filter — wrong user = 404. Anti-enumeration.
+    appointment = get_object_or_404(
+        Appointment.objects.select_related("doctor"),
+        id=appointment_id,
+        patient=request.user,
+    )
+
+    next_url = request.POST.get("next") or request.GET.get("next") or ""
+
+    if request.method == "POST":
+        try:
+            cancel_appointment(appointment, actor=request.user)
+            messages.success(request, "Appointment cancelled.")
+        except ValidationError as e:
+            messages.error(request, str(e.message if hasattr(e, "message") else e))
+        return redirect(next_url or "appointments_list")
+
+    # GET → show the confirm page
+    return render(request, "cancel_appointment_confirm.html", {
+        "appointment": appointment,
+        "next": next_url,
+    })
+
+
+@login_required
 def mark_no_show_view(request, appointment_id):
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
@@ -146,6 +189,49 @@ def _require_doctor(request):
     """Helper: 404 if the user isn't a doctor. Same anti-enumeration pattern."""
     if request.user.role != "doctor":
         raise Http404
+
+
+@login_required
+def appointments_list(request):
+    role = request.user.role
+    now = timezone.now()
+
+    if role == "doctor":
+        qs = (
+            Appointment.objects
+            .filter(doctor=request.user)
+            .select_related("patient")
+        )
+        upcoming = qs.filter(status=Appointment.Status.BOOKED, scheduled_for__gte=now).order_by("scheduled_for")
+        past_due = qs.filter(status=Appointment.Status.BOOKED, scheduled_for__lt=now).order_by("-scheduled_for")
+        history = qs.exclude(status=Appointment.Status.BOOKED).order_by("-scheduled_for")[:50]
+        return render(request, "appointments_list.html", {
+            "role": role,
+            "now": now,
+            "upcoming": upcoming,
+            "past_due": past_due,
+            "history": history,
+        })
+
+    if role == "patient":
+        qs = (
+            Appointment.objects
+            .filter(patient=request.user)
+            .select_related("doctor")
+        )
+        upcoming = qs.filter(status=Appointment.Status.BOOKED, scheduled_for__gte=now).order_by("scheduled_for")
+        history = qs.exclude(status=Appointment.Status.BOOKED).order_by("-scheduled_for")[:50]
+        past_booked = qs.filter(status=Appointment.Status.BOOKED, scheduled_for__lt=now).order_by("-scheduled_for")
+        return render(request, "appointments_list.html", {
+            "role": role,
+            "now": now,
+            "upcoming": upcoming,
+            "past_booked": past_booked,
+            "history": history,
+        })
+
+    # admin and any other role: 404 — they should use the Django admin
+    raise Http404
 
 
 @login_required

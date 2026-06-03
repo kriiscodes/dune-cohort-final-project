@@ -1,52 +1,232 @@
 {% extends "base_marketing.html" %}
+{% load static %}
 
 {% block title %}Book a doctor in minutes{% endblock %}
 
 {% block content %}
-  <section class="hero">
+
+  {# ============ Hero ============ #}
+  <section class="home-hero">
     <div class="container">
-      <p class="hero-eyebrow">HEALTHCARE, ON YOUR SCHEDULE</p>
-      <h1>Book a doctor in minutes,<br>not days.</h1>
-      <p>MediSlot makes it easy to find verified doctors, see their real-time availability, and book an appointment that actually fits your day.</p>
-      <div class="hero-ctas">
-        <a href="{% url 'doctor_list' %}" class="btn btn-primary btn-lg">Find a doctor</a>
-        <a href="{% url 'about' %}" class="btn btn-secondary btn-lg">How it works</a>
+      <div class="hero-card">
+        <div class="hero-card-text">
+          <h1>Book a verified doctor<br>in minutes, not days.</h1>
+          <p class="hero-card-lead">MediSlot helps you find verified doctors, see real-time availability, and book a slot that actually fits your day.</p>
+          <a href="{% url 'doctor_list' %}" class="btn btn-hero-cta">Find a doctor <i class="fa-solid fa-arrow-right"></i></a>
+
+          <div class="hero-reviews">
+            <p class="hero-reviews-label">Trusted by patients</p>
+            <div class="hero-reviews-chip">
+              <div class="hero-avatars">
+                <span class="hero-avatar"></span>
+                <span class="hero-avatar"></span>
+                <span class="hero-avatar"></span>
+              </div>
+              <span class="hero-reviews-quote">Trusted by 200+ patients</span>
+              <span class="hero-reviews-rating">4.9 ★</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-card-photo">
+          <img src="{% static 'images/hero-doctor.jpg' %}" alt="Verified doctor">
+        </div>
+
       </div>
     </div>
   </section>
 
+  {# ============ Trust strip ============ #}
+  <section class="trust-strip">
+    <div class="container">
+      <div class="trust-grid">
+        <div class="trust-item">
+          <span class="trust-icon"><i class="fa-solid fa-circle-check"></i></span>
+          <div>
+            <strong>Verified Doctors</strong>
+            <p>Every provider is reviewed before they list.</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon"><i class="fa-solid fa-calendar-check"></i></span>
+          <div>
+            <strong>Real-time Availability</strong>
+            <p>See open slots the moment they're free.</p>
+          </div>
+        </div>
+        <div class="trust-item">
+          <span class="trust-icon"><i class="fa-solid fa-rotate"></i></span>
+          <div>
+            <strong>Cancel Anytime</strong>
+            <p>Reschedule or cancel in seconds.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {# ============ About + stats ============ #}
   <section class="section">
     <div class="container">
-      <div class="section-heading">
-        <h2>Why MediSlot</h2>
-        <p>Three things we get right that booking by phone doesn't.</p>
-      </div>
+      <div class="about-block">
+        <div class="about-collage">
+          <img class="about-photo-main" src="{% static 'images/about-1.jpg' %}" alt="">
+          <img class="about-photo-overlay" src="{% static 'images/about-2.jpg' %}" alt="">
+          <div class="about-badge" aria-hidden="true">
+            <svg viewBox="0 0 100 100" class="hero-stamp-svg">
+              <defs>
+                <path id="about-badge-circle" d="M 50,50 m -36,0 a 36,36 0 1,1 72,0 a 36,36 0 1,1 -72,0" />
+              </defs>
+              <text font-size="11" font-weight="600" letter-spacing="2.5" fill="#2F3E3C">
+                <textPath href="#about-badge-circle">CARE THAT FITS YOU • CARE THAT FITS YOU • </textPath>
+              </text>
+            </svg>
+            <span class="about-badge-arrow">→</span>
+          </div>
+        </div>
 
-      <div class="card-grid">
-        <div class="card">
-          <div class="feature-icon">📅</div>
-          <h3>Real-time availability</h3>
-          <p>See open slots the moment they're free. No back-and-forth, no "we'll call you back."</p>
-        </div>
-        <div class="card">
-          <div class="feature-icon">✓</div>
-          <h3>Verified doctors only</h3>
-          <p>Every doctor on MediSlot is reviewed and approved before they show up in search.</p>
-        </div>
-        <div class="card">
-          <div class="feature-icon">⚡</div>
-          <h3>Built to cut no-shows</h3>
-          <p>Easy reschedule and cancellation means slots free up fast — for you and the next patient.</p>
+        <div class="about-content">
+          <p class="eyebrow">ABOUT MEDISLOT</p>
+          <h2>Care that fits your schedule, not the other way around.</h2>
+          <p class="about-lead">Skip the phone tag. Browse verified doctors, see open slots in real time, and book the one that works — usually in under two minutes.</p>
+
+          <ul class="about-checks">
+            <li><span class="check-mark"><i class="fa-solid fa-check"></i></span> Every doctor verified before they list</li>
+            <li><span class="check-mark"><i class="fa-solid fa-check"></i></span> Real-time slot availability</li>
+            <li><span class="check-mark"><i class="fa-solid fa-check"></i></span> Trusted by patients across the country</li>
+          </ul>
+
+          <div class="about-cta-row">
+            <div class="about-ctas">
+              <a href="{% url 'about' %}" class="btn btn-primary">Learn more <i class="fa-solid fa-arrow-right"></i></a>
+              <a href="{% url 'doctor_list' %}" class="btn btn-ghost-bordered"><i class="fa-solid fa-play"></i> Browse doctors</a>
+            </div>
+            <div class="about-stat-tile">
+              <span class="about-stat-icon"><i class="fa-solid fa-user-group"></i></span>
+              <strong>200+</strong>
+              <span>Verified<br>Doctors</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section section-tint">
-    <div class="container cta-band">
-      <h2>Ready to book your first appointment?</h2>
-      <p>Browse our verified doctors and book in under two minutes.</p>
-      <a href="{% url 'doctor_list' %}" class="btn btn-primary btn-lg">See doctors</a>
+  {# ============ Inline stats ============ #}
+  <section class="stats-strip">
+    <div class="container">
+      <div class="stats-inline">
+        <div class="stat-inline">
+          <span class="stat-inline-icon"><i class="fa-solid fa-user-doctor"></i></span>
+          <div>
+            <strong>200+</strong>
+            <span>Verified Doctors</span>
+          </div>
+        </div>
+        <div class="stats-divider"></div>
+        <div class="stat-inline">
+          <span class="stat-inline-icon"><i class="fa-solid fa-bolt"></i></span>
+          <div>
+            <strong>&lt; 2 min</strong>
+            <span>Avg Booking Time</span>
+          </div>
+        </div>
+        <div class="stats-divider"></div>
+        <div class="stat-inline">
+          <span class="stat-inline-icon"><i class="fa-solid fa-star"></i></span>
+          <div>
+            <strong>4.9 / 5</strong>
+            <span>Patient Rating</span>
+          </div>
+        </div>
+        <div class="stats-divider"></div>
+        <div class="stat-inline">
+          <span class="stat-inline-icon"><i class="fa-regular fa-clock"></i></span>
+          <div>
+            <strong>24/7</strong>
+            <span>Online Access</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
+
+  {# ============ How it works ============ #}
+  <section class="how-section">
+    <div class="container">
+      <div class="how-heading">
+        <span class="how-eyebrow">Simple Steps</span>
+        <h2>How it works</h2>
+        <p class="how-sub">No confusion or delays. Just fast, verified care.</p>
+      </div>
+
+      <div class="how-layout">
+        {# ----- Left: visual ----- #}
+        <div class="how-visual">
+          <div class="how-photo">
+            <img src="{% static 'images/how-it-works.jpg' %}" alt="A verified MediSlot doctor">
+          </div>
+
+          <span class="how-float-pill">
+            <i class="fa-solid fa-calendar-day"></i> Pick a slot
+          </span>
+
+          <div class="how-float-card">
+            <span class="how-float-card-title">Available slots</span>
+            <div class="how-float-grid">
+              <span class="how-float-slot is-active">09:00</span>
+              <span class="how-float-slot">09:30</span>
+              <span class="how-float-slot">10:00</span>
+              <span class="how-float-slot is-active">10:30</span>
+              <span class="how-float-slot">11:00</span>
+              <span class="how-float-slot is-active">11:30</span>
+            </div>
+          </div>
+        </div>
+
+        {# ----- Right: steps ----- #}
+        <ol class="how-steps">
+          <li class="how-step is-active">
+            <div class="how-step-icon">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <div class="how-step-body">
+              <h3>Find a verified doctor</h3>
+              <p>Search by name or specialty. Every doctor on MediSlot is verified before they appear.</p>
+            </div>
+          </li>
+          <li class="how-step">
+            <div class="how-step-icon">
+              <i class="fa-solid fa-calendar-day"></i>
+            </div>
+            <div class="how-step-body">
+              <h3>Pick a slot</h3>
+              <p>Browse real-time availability on the calendar and choose a time that works for you.</p>
+            </div>
+          </li>
+          <li class="how-step">
+            <div class="how-step-icon">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="how-step-body">
+              <h3>Get confirmed</h3>
+              <p>Book instantly and get an immediate confirmation. Manage everything from your dashboard.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  {# ============ CTA ============ #}
+  <section class="section">
+    <div class="container">
+      <div class="cta-card">
+        <h2>Ready to book your first appointment?</h2>
+        <p>Browse our verified doctors and book in under two minutes.</p>
+        <a href="{% url 'doctor_list' %}" class="btn btn-cta-light btn-lg">See doctors <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </div>
+  </section>
+
 {% endblock %}

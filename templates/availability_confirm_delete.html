@@ -2,32 +2,29 @@
 
 {% block title %}Delete availability rule{% endblock %}
 
-{% block dash_greeting %}Delete this rule?{% endblock %}
-{% block dash_subgreeting %}This action cannot be undone.{% endblock %}
+{% block dash_greeting %}Delete availability rule{% endblock %}
+{% block dash_subgreeting %}Confirm before this rule is removed.{% endblock %}
 
 {% block content %}
   <div class="dash-card" style="max-width: 560px;">
-    <p>You're about to delete this availability rule:</p>
+    <h2>Are you sure?</h2>
+    <p>You're about to delete this rule. Patients won't be able to book in this window any more.</p>
 
-    <div class="appt-item" style="border-bottom: none;">
-      <div>
-        <strong>{{ rule.get_weekday_display }}</strong>
-        <p class="appt-time">
-          {{ rule.start_time|time:"H:i" }} – {{ rule.end_time|time:"H:i" }}
-          · {{ rule.slot_duration }} min slots
-        </p>
-      </div>
-    </div>
-
-    <p style="margin-top: 16px;">
-      Patients won't be able to book new slots under this rule. Existing bookings are unaffected.
-    </p>
+    <ul class="appt-list">
+      <li class="appt-item">
+        <div>
+          <strong>{{ rule.get_weekday_display }}</strong>
+          <p class="appt-time">
+            {{ rule.start_time|time:"H:i" }} – {{ rule.end_time|time:"H:i" }}
+            · {{ rule.slot_duration }} min slots
+          </p>
+        </div>
+      </li>
+    </ul>
 
     <form method="post" style="display:flex; gap:12px; margin-top:24px;">
       {% csrf_token %}
-      <button type="submit" class="btn btn-primary" style="background: var(--no-show);">
-        Yes, delete
-      </button>
+      <button type="submit" class="btn btn-primary">Delete rule</button>
       <a href="{% url 'availability_list' %}" class="btn btn-ghost">Cancel</a>
     </form>
   </div>

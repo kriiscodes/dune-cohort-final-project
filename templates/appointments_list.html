@@ -1,0 +1,142 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Appointments{% endblock %}
+
+{% block dash_greeting %}Appointments{% endblock %}
+{% block dash_subgreeting %}
+  {% if role == "doctor" %}All your patient appointments in one place.
+  {% else %}Everything you've booked, past and upcoming.
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% if role == "doctor" %}
+    <div class="dash-card">
+      <h2>Needs review</h2>
+      {% if past_due %}
+        <p>These slots have passed but aren't closed out yet.</p>
+        <ul class="appt-list">
+          {% for appt in past_due %}
+            <li class="appt-item">
+              <div>
+                <strong>{{ appt.patient.username }}</strong>
+                <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+              </div>
+              <div class="appt-actions">
+                <form method="post" action="{% url 'mark_complete' appt.id %}" class="appt-action-form">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-secondary btn-sm">Mark complete</button>
+                </form>
+                <form method="post" action="{% url 'mark_no_show' appt.id %}" class="appt-action-form">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-ghost btn-sm">No-show</button>
+                </form>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>Nothing waiting on you. Past appointments are all closed out.</p>
+      {% endif %}
+    </div>
+
+    <div class="dash-card">
+      <h2>Upcoming</h2>
+      {% if upcoming %}
+        <ul class="appt-list">
+          {% for appt in upcoming %}
+            <li class="appt-item">
+              <div>
+                <strong>{{ appt.patient.username }}</strong>
+                <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+              </div>
+              <span class="badge badge-booked">Booked</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No upcoming appointments.</p>
+      {% endif %}
+    </div>
+
+    <div class="dash-card">
+      <h2>History</h2>
+      {% if history %}
+        <ul class="appt-list">
+          {% for appt in history %}
+            <li class="appt-item">
+              <div>
+                <strong>{{ appt.patient.username }}</strong>
+                <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+              </div>
+              <span class="badge badge-{{ appt.status }}">{{ appt.get_status_display }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No closed-out appointments yet.</p>
+      {% endif %}
+    </div>
+
+  {% else %}
+    {# patient #}
+    <div class="dash-card">
+      <h2>Upcoming</h2>
+      {% if upcoming %}
+        <ul class="appt-list">
+          {% for appt in upcoming %}
+            <li class="appt-item">
+              <div>
+                <strong>Dr. {{ appt.doctor.username }}</strong>
+                <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+              </div>
+              <div class="appt-actions">
+                <span class="badge badge-booked">Booked</span>
+                <a href="{% url 'cancel_appointment' appt.id %}" class="btn btn-ghost btn-sm">Cancel</a>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No upcoming appointments. <a href="{% url 'doctor_list' %}">Find a doctor</a> to book one.</p>
+      {% endif %}
+    </div>
+
+    {% if past_booked %}
+      <div class="dash-card">
+        <h2>Past (awaiting close-out)</h2>
+        <p>These visits have happened but your doctor hasn't marked them yet.</p>
+        <ul class="appt-list">
+          {% for appt in past_booked %}
+            <li class="appt-item">
+              <div>
+                <strong>Dr. {{ appt.doctor.username }}</strong>
+                <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+              </div>
+              <span class="badge badge-booked">Booked</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <div class="dash-card">
+      <h2>History</h2>
+      {% if history %}
+        <ul class="appt-list">
+          {% for appt in history %}
+            <li class="appt-item">
+              <div>
+                <strong>Dr. {{ appt.doctor.username }}</strong>
+                <p class="appt-time">{{ appt.scheduled_for|date:"l, j F · H:i" }}</p>
+              </div>
+              <span class="badge badge-{{ appt.status }}">{{ appt.get_status_display }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No completed or cancelled appointments yet.</p>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endblock %}

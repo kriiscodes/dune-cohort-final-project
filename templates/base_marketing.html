@@ -1,31 +1,46 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block body %}
-  <nav class="nav">
+  <nav class="nav" x-data="{ open: false }" @keydown.escape.window="open = false">
     <div class="nav-inner">
       <a href="{% url 'home' %}" class="nav-logo">
-        <span class="nav-logo-mark">+</span>
+        <img src="{% static 'images/logo.png' %}" alt="MediSlot" class="nav-logo-img">
         MediSlot
       </a>
 
-      <div class="nav-links">
-        <a href="{% url 'home' %}">Home</a>
-        <a href="{% url 'about' %}">About</a>
-        <a href="{% url 'doctor_list' %}">Doctors</a>
-      </div>
+      <button type="button" class="menu-toggle" @click="open = true" aria-label="Open menu" :aria-expanded="open">
+        <i class="fa-solid fa-bars"></i>
+      </button>
 
-      <div class="nav-cta">
-        {% if request.user.is_authenticated %}
-          <a href="{% url 'dashboard' %}" class="btn btn-primary">Dashboard</a>
-        {% else %}
-          <a href="{% url 'login' %}" class="btn btn-ghost">Log in</a>
-          <a href="{% url 'signup' %}" class="btn btn-primary">Sign up</a>
-        {% endif %}
+      <div class="nav-drawer" :class="{ 'is-open': open }">
+        <button type="button" class="menu-close" @click="open = false" aria-label="Close menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="nav-links">
+          {% with active=request.resolver_match.url_name %}
+            <a href="{% url 'home' %}" class="{% if active == 'home' %}is-active{% endif %}">Home</a>
+            <a href="{% url 'about' %}" class="{% if active == 'about' %}is-active{% endif %}">About</a>
+            <a href="{% url 'doctor_list' %}" class="{% if active == 'doctor_list' or active == 'doctor_detail' %}is-active{% endif %}">Doctors</a>
+          {% endwith %}
+        </div>
+
+        <div class="nav-cta">
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn btn-primary">Dashboard</a>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-ghost">Log in</a>
+            <a href="{% url 'signup' %}" class="btn btn-primary">Sign up</a>
+          {% endif %}
+        </div>
       </div>
     </div>
+
+    <div class="menu-backdrop" :class="{ 'is-open': open }" @click="open = false"></div>
   </nav>
 
-  <main class="marketing-main">
+  <main class="marketing-main" data-reveal-root>
   {% if messages %}
     <ul class="messages">
       {% for message in messages %}

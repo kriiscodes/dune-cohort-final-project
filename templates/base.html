@@ -10,6 +10,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
   <script defer src="https://unpkg.com/htmx.org@1.9.12"></script>
@@ -19,5 +21,71 @@
 </head>
 <body>
   {% block body %}{% endblock %}
+
+  {% comment %}
+    Scroll-reveal: progressively fade blocks in as they enter the viewport.
+    Runs at end of body so targets exist and the hidden state is set before
+    first paint (no flash). Only touches pages that opt in via
+    data-reveal-root, so the dashboard is never affected.
+  {% endcomment %}
+  <script>
+    (function () {
+      var roots = document.querySelectorAll('[data-reveal-root]');
+      if (!roots.length) return;
+
+      // Respect reduced-motion and missing IntersectionObserver: show as-is.
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !('IntersectionObserver' in window)) return;
+
+      var STAGGER_GRIDS = '.card-grid, .trust-grid';
+      var SKIP = { SCRIPT: 1, STYLE: 1, TEMPLATE: 1, NOSCRIPT: 1, BR: 1 };
+      var targets = [];
+
+      function collect(scope) {
+        var order = 0;
+        for (var i = 0; i < scope.children.length; i++) {
+          var child = scope.children[i];
+          if (SKIP[child.tagName]) continue;
+          if (child.classList.contains('messages')) continue;
+
+          if (child.matches && child.matches(STAGGER_GRIDS)) {
+            // Stagger the grid's items instead of the grid as a whole.
+            for (var j = 0; j < child.children.length; j++) {
+              tag(child.children[j], order++);
+            }
+          } else {
+            tag(child, order++);
+          }
+        }
+      }
+
+      function tag(el, index) {
+        el.setAttribute('data-reveal', '');
+        var delay = Math.min(index, 6) * 70; // cap the cascade
+        if (delay) el.style.setProperty('--reveal-delay', delay + 'ms');
+        targets.push(el);
+      }
+
+      roots.forEach(function (root) {
+        var containers = root.querySelectorAll('.container');
+        if (containers.length) {
+          containers.forEach(collect);
+        } else {
+          collect(root); // auth pages have no .container
+        }
+      });
+
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+
+      targets.forEach(function (el) { io.observe(el); });
+    })();
+  </script>
 </body>
 </html>

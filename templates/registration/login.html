@@ -1,7 +1,46 @@
-<h1>Log in</h1>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Log in</button>
-</form>
-<p>Don't have an account? <a href="/accounts/signup/">Sign up</a></p>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Log in{% endblock %}
+
+{% block body %}
+  <div class="auth-shell" data-reveal-root>
+    <a href="{% url 'home' %}" class="auth-logo">
+      <img src="{% static 'images/logo.png' %}" alt="MediSlot">
+      <span>MediSlot</span>
+    </a>
+
+    <div class="auth-card">
+      <h1>Welcome back</h1>
+      <p class="auth-sub">Log in to manage your appointments.</p>
+
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div class="auth-error">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+
+        {% for field in form %}
+          <div class="form-field">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+              <ul class="errorlist">
+                {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-primary btn-lg auth-submit">Log in</button>
+      </form>
+
+      <p class="auth-switch">
+        Don't have an account? <a href="{% url 'signup' %}">Sign up</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}

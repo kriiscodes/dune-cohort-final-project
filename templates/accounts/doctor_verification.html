@@ -1,0 +1,72 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Doctor verification{% endblock %}
+
+{% block dash_greeting %}Doctor verification{% endblock %}
+{% block dash_subgreeting %}Approve doctors so they can appear in patient search.{% endblock %}
+
+{% block content %}
+  <div class="dash-card">
+    <div class="dash-card-head">
+      <h2>Pending approval</h2>
+      <span class="badge badge-no-show">{{ pending|length }}</span>
+    </div>
+
+    {% if pending %}
+      <ul class="appt-list">
+        {% for profile in pending %}
+          <li class="appt-item">
+            <div>
+              <strong>Dr. {{ profile.user.username }}</strong>
+              <p class="appt-time">
+                {{ profile.specialty|default:"No specialty set" }}
+                {% if profile.user.email %} · {{ profile.user.email }}{% endif %}
+              </p>
+            </div>
+            <div class="appt-actions">
+              <form method="post" class="appt-action-form">
+                {% csrf_token %}
+                <input type="hidden" name="profile_id" value="{{ profile.id }}">
+                <input type="hidden" name="action" value="verify">
+                <button type="submit" class="btn btn-primary btn-sm">Verify</button>
+              </form>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No doctors waiting for approval.</p>
+    {% endif %}
+  </div>
+
+  <div class="dash-card">
+    <div class="dash-card-head">
+      <h2>Verified doctors</h2>
+      <span class="badge badge-completed">{{ verified|length }}</span>
+    </div>
+
+    {% if verified %}
+      <ul class="appt-list">
+        {% for profile in verified %}
+          <li class="appt-item">
+            <div>
+              <strong>Dr. {{ profile.user.username }}</strong>
+              <p class="appt-time">{{ profile.specialty|default:"No specialty set" }}</p>
+            </div>
+            <div class="appt-actions">
+              <span class="badge badge-completed">Verified</span>
+              <form method="post" class="appt-action-form">
+                {% csrf_token %}
+                <input type="hidden" name="profile_id" value="{{ profile.id }}">
+                <input type="hidden" name="action" value="unverify">
+                <button type="submit" class="btn btn-ghost btn-sm">Revoke</button>
+              </form>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No verified doctors yet.</p>
+    {% endif %}
+  </div>
+{% endblock %}

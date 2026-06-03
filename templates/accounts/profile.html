@@ -1,0 +1,101 @@
+{% extends "base_dashboard.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block dash_greeting %}My profile{% endblock %}
+{% block dash_subgreeting %}Keep your details up to date.{% endblock %}
+
+{% block content %}
+  <div class="dash-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <h2 style="margin:0;">Account</h2>
+      <a href="{% url 'profile_edit' %}" class="btn btn-secondary btn-sm">Edit</a>
+    </div>
+
+    <ul class="appt-list">
+      <li class="appt-item">
+        <div>
+          <strong>Username</strong>
+          <p class="appt-time">{{ request.user.username }}</p>
+        </div>
+      </li>
+      <li class="appt-item">
+        <div>
+          <strong>Email</strong>
+          <p class="appt-time">{{ request.user.email|default:"Not set" }}</p>
+        </div>
+      </li>
+      <li class="appt-item">
+        <div>
+          <strong>Name</strong>
+          <p class="appt-time">
+            {% if request.user.first_name or request.user.last_name %}
+              {{ request.user.first_name }} {{ request.user.last_name }}
+            {% else %}Not set{% endif %}
+          </p>
+        </div>
+      </li>
+      <li class="appt-item">
+        <div>
+          <strong>Role</strong>
+          <p class="appt-time"><span class="badge badge-{{ request.user.role }}">{{ request.user.get_role_display }}</span></p>
+        </div>
+      </li>
+      <li class="appt-item">
+        <div>
+          <strong>Member since</strong>
+          <p class="appt-time">{{ request.user.date_joined|date:"j F Y" }}</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  {% if doctor_profile %}
+    <div class="dash-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <h2 style="margin:0;">Doctor details</h2>
+        {% if doctor_profile.is_verified %}
+          <span class="badge badge-completed">Verified</span>
+        {% else %}
+          <span class="badge badge-no-show">Pending verification</span>
+        {% endif %}
+      </div>
+
+      {% if not doctor_profile.is_verified %}
+        <p>Your profile is awaiting admin verification. You won't appear in patient search until you're approved.</p>
+      {% endif %}
+
+      <ul class="appt-list">
+        <li class="appt-item">
+          <div>
+            <strong>Specialty</strong>
+            <p class="appt-time">{{ doctor_profile.specialty|default:"Not set" }}</p>
+          </div>
+        </li>
+        <li class="appt-item">
+          <div>
+            <strong>Bio</strong>
+            <p class="appt-time">{{ doctor_profile.bio|default:"Not set" }}</p>
+          </div>
+        </li>
+        <li class="appt-item">
+          <div>
+            <strong>Fee</strong>
+            <p class="appt-time">{% if doctor_profile.fee is not None %}₦{{ doctor_profile.fee }}{% else %}Not set{% endif %}</p>
+          </div>
+        </li>
+        <li class="appt-item">
+          <div>
+            <strong>Photo</strong>
+            <p class="appt-time">
+              {% if doctor_profile.photo %}
+                <img src="{{ doctor_profile.photo.url }}" alt="" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">
+              {% else %}Not set{% endif %}
+            </p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  {% endif %}
+
+{% endblock %}
