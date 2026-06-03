@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 import dj_database_url
@@ -45,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'cloudinary_storage',
+    'cloudinary',
     "rest_framework",
     'accounts',
     'appointments',
@@ -154,6 +157,15 @@ STORAGES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Media uploads: use Cloudinary when configured, otherwise the local media/
+# folder. Render's filesystem is ephemeral, so production needs Cloudinary.
+CLOUDINARY_URL = config('CLOUDINARY_URL', default='')
+if CLOUDINARY_URL:
+    os.environ['CLOUDINARY_URL'] = CLOUDINARY_URL  # picked up by the cloudinary SDK
+    STORAGES['default'] = {
+        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+    }
 
 AUTH_USER_MODEL = "accounts.User"
 LOGIN_REDIRECT_URL = "/"
