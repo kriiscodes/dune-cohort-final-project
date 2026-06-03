@@ -1,0 +1,3 @@
+# Shell scripts run on Linux (Render) — force Unix line endings.
+*.sh text eol=lf
+Procfile text eol=lf
