@@ -113,15 +113,21 @@ can actually develop over plain HTTP.
 ## Deployment
 
 Production runs on Render with a Supabase Postgres database and Cloudinary for media.
-The repo already includes what Render needs — a `Procfile`, a `build.sh` that installs,
-collects static files, and migrates, and a `requirements.txt`. On Render you point a
-Web Service at this repo with:
+The repo already includes what Render needs — a `requirements.txt`, and a `Procfile`.
+On Render you point a Web Service at this repo with:
 
-- **Build command:** `bash build.sh`
+- **Build command:** `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
 - **Start command:** `gunicorn config.wsgi`
-- **Environment variables:** `SECRET_KEY`, `DEBUG=False`, `DATABASE_URL` (Supabase),
-  `CLOUDINARY_URL`, `ALLOWED_HOSTS` (your Render hostname), and `CSRF_TRUSTED_ORIGINS`
-  (the same host with `https://` in front).
+- **Environment variables:**
+
+  | Key | Example value |
+  | --- | --- |
+  | `SECRET_KEY` | a long random string |
+  | `DEBUG` | `False` |
+  | `DATABASE_URL` | your Supabase connection string |
+  | `CLOUDINARY_URL` | `cloudinary://key:secret@cloud-name` |
+  | `ALLOWED_HOSTS` | `medislot-abcd.onrender.com` (your Render hostname, no `https://`) |
+  | `CSRF_TRUSTED_ORIGINS` | `https://medislot-abcd.onrender.com` (same host, with `https://`) |
 
 ---
 
