@@ -178,6 +178,24 @@ REST_FRAMEWORK = {
     ],
 }
 
+# Log request errors (500s) to stderr so they show up in Render's logs.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
+
 # Production-only security hardening (active when DEBUG is False).
 # Render serves the app over HTTPS behind a proxy.
 if not DEBUG:
