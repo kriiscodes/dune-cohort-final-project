@@ -1658,36 +1658,32 @@ img { max-width: 100%; display: block; }
   margin-bottom: 6px;
   font-size: 13px;
 }
+.about-stat-tile-text { display: flex; flex-direction: column; gap: 2px; }
 .about-stat-tile strong { font-size: 22px; line-height: 1.05; }
 .about-stat-tile span { font-size: 11px; color: rgba(255, 255, 255, 0.85); line-height: 1.2; }
 
 /* --- STATS INLINE STRIP --- */
 .stats-strip { padding: 24px 0 64px; }
 .stats-inline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 32px 0;
-  border-top: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
 }
-.stat-inline { display: inline-flex; gap: 14px; align-items: center; }
-.stat-inline-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: var(--brand-tint);
-  color: var(--brand);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
+.stat-inline {
+  background: #F5F6F8;
+  border-radius: 16px;
+  padding: 22px 24px;
+}
+.stat-inline strong {
+  display: block;
+  font-size: 38px;
   font-weight: 700;
+  color: var(--ink);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
 }
-.stat-inline strong { display: block; font-size: 22px; font-weight: 700; color: var(--ink); line-height: 1.1; }
-.stat-inline span { font-size: 12px; color: var(--ink-muted); }
-.stats-divider { width: 1px; height: 36px; background: var(--border); }
+.stat-inline span { font-size: 14px; color: var(--ink-muted); }
 
 /* --- HOW IT WORKS --- */
 .how-section { padding: 56px 0 80px; }
@@ -1874,8 +1870,7 @@ img { max-width: 100%; display: block; }
   .about-badge { display: none; }
   .about-content h2 { font-size: 28px; }
   .about-lead { max-width: none; }
-  .stats-inline { flex-wrap: wrap; gap: 24px; justify-content: flex-start; }
-  .stats-divider { display: none; }
+  .stats-inline { grid-template-columns: 1fr 1fr; }
   .how-heading h2 { font-size: 30px; }
   .how-layout { grid-template-columns: 1fr; gap: 56px; }
   .how-visual { max-width: 400px; margin: 0 auto; }
@@ -1885,6 +1880,7 @@ img { max-width: 100%; display: block; }
 }
 
 @media (max-width: 600px) {
+  .stat-inline strong { font-size: 30px; }
   .about-collage { aspect-ratio: 4 / 3.4; max-width: 340px; }
   .about-badge { width: 80px; height: 80px; left: 52%; top: 34%; }
   .about-badge-arrow { width: 30px; height: 30px; font-size: 14px; }
@@ -1893,7 +1889,7 @@ img { max-width: 100%; display: block; }
   .about-cta-row { flex-direction: column; align-items: stretch; gap: 14px; }
   .about-ctas { flex-direction: column; gap: 8px; width: 100%; }
   .about-ctas .btn { width: 100%; justify-content: center; }
-  .about-stat-tile { width: 100%; min-width: 0; flex-direction: row; align-items: center; gap: 14px; }
+  .about-stat-tile { width: 100%; min-width: 0; flex-direction: row; align-items: center; justify-content: center; gap: 14px; }
   .about-stat-tile .about-stat-icon { margin-bottom: 0; }
   .about-stat-tile strong { font-size: 20px; }
 }
@@ -2017,6 +2013,7 @@ img { max-width: 100%; display: block; }
   .about-mission { grid-template-columns: 1fr; gap: 20px; }
   .about-header h1 { font-size: 40px; }
   .started { grid-template-columns: 1fr; gap: 36px; }
+  .started-eyebrow { text-align: center; }
   .started-heading { font-size: 34px; }
   .started-body { max-width: none; }
   .started-stat strong { font-size: 32px; }

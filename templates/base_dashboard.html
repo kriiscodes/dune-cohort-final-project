@@ -4,10 +4,6 @@
 {% block body %}
 <div class="dash" x-data="{ open: false }" @keydown.escape.window="open = false">
   <aside class="dash-sidebar" :class="{ 'is-open': open }">
-    <button type="button" class="menu-close" @click="open = false" aria-label="Close menu">
-      <i class="fa-solid fa-xmark"></i>
-    </button>
-
     {% with url_name=request.resolver_match.url_name %}
     <nav class="dash-nav">
       <a href="{% url 'dashboard' %}" class="dash-nav-link {% if url_name == 'dashboard' %}active{% endif %}" title="Dashboard">
